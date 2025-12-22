@@ -7,13 +7,13 @@ Quick start:
 1. Install dependencies:
 
 ```bash
-npm install
+yarn install
 ```
 
 2. Run dev server:
 
 ```bash
-npm run dev
+yarn run dev
 ```
 
 The dev server uses Vite. Open the URL shown in the terminal (usually http://localhost:5173).
