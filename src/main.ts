@@ -1,4 +1,4 @@
-import { loadImage } from '../assets';
+import { loadImage } from './assets';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -80,7 +80,7 @@ window.addEventListener('touchstart', (e) => {
 
 // load assets (placeholder) then start loop
 Promise.resolve()
-  .then(() => loadImage('/assets/dino.png').catch(() => null))
+  .then(() => loadImage('/assets/dino_lef_foot.png').catch(() => null))
   .then(() => {
     last = performance.now();
     requestAnimationFrame(loop);
