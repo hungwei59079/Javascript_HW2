@@ -1,4 +1,4 @@
-import { loadImage } from './assets';
+import { loadDinoImage, Dino } from './dino';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -6,38 +6,30 @@ const ctx = canvas.getContext('2d')!;
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 
-type Player = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  vy: number;
-  onGround: boolean;
-};
-
-const player: Player = { x: 50, y: HEIGHT - 50, w: 40, h: 40, vy: 0, onGround: true };
-
-const GRAVITY = 0.9;
-const JUMP_V = -15;
-
 let last = 0;
 
-function resizeCanvas() {
-  // keep fixed logical size (we set width/height in HTML)
+const dino = new Dino({ x: 50, y: HEIGHT - 50, w: 40, h: 40, groundY: HEIGHT - 20 });
+
+// attach controls managed by Dino
+dino.attachControls();
+
+// load dino image then start loop
+loadDinoImage()
+  .then((img) => {
+    dino.setImage(img);
+    last = performance.now();
+    requestAnimationFrame(loop);
+  })
+  .catch(() => {
+    last = performance.now();
+    requestAnimationFrame(loop);
+  });
+
+  function update(dt: number) {
+  dino.update(dt);
 }
 
-function update(dt: number) {
-  // physics
-  if (!player.onGround) {
-    player.vy += GRAVITY * dt;
-    player.y += player.vy;
-    if (player.y + player.h >= HEIGHT - 20) {
-      player.y = HEIGHT - 20 - player.h;
-      player.vy = 0;
-      player.onGround = true;
-    }
-  }
-}
+// -----------Definitions-----------
 
 function draw() {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -45,9 +37,8 @@ function draw() {
   ctx.fillStyle = '#666';
   ctx.fillRect(0, HEIGHT - 20, WIDTH, 20);
 
-  // player
-  ctx.fillStyle = '#222';
-  ctx.fillRect(player.x, player.y, player.w, player.h);
+  // dino (draws image if available)
+  dino.draw(ctx);
 }
 
 function loop(ts: number) {
@@ -57,31 +48,3 @@ function loop(ts: number) {
   last = ts;
   requestAnimationFrame(loop);
 }
-
-function jump() {
-  if (player.onGround) {
-    player.vy = JUMP_V;
-    player.onGround = false;
-  }
-}
-
-window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' || e.code === 'ArrowUp') {
-    e.preventDefault();
-    jump();
-  }
-});
-
-// touch support
-window.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  jump();
-}, { passive: false });
-
-// load assets (placeholder) then start loop
-Promise.resolve()
-  .then(() => loadImage('/assets/dino_lef_foot.png').catch(() => null))
-  .then(() => {
-    last = performance.now();
-    requestAnimationFrame(loop);
-  });
