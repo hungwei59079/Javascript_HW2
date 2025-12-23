@@ -5,10 +5,11 @@ const ctx = canvas.getContext('2d')!;
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
+const initial_height = HEIGHT - 50
 
 let last = 0;
 
-const dino = new Dino({ x: 50, y: HEIGHT - 50, w: 40, h: 40, groundY: HEIGHT - 20 });
+const dino = new Dino({ x: 50, y: initial_height, y0: initial_height, w: 40, h: 40});
 
 // attach controls managed by Dino
 dino.attachControls();
@@ -25,11 +26,11 @@ loadDinoImage()
     requestAnimationFrame(loop);
   });
 
-  function update(dt: number) {
-  dino.update(dt);
-}
-
 // -----------Definitions-----------
+function update(dt: number) {
+  dino.update(dt);
+  console.log(`On ground: ${dino.onGround}; vy = ${dino.vy}, y = ${dino.y}, dt = ${dt} h = ${dino.h}`)
+}
 
 function draw() {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);

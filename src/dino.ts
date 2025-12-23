@@ -1,15 +1,15 @@
 import { loadImage } from './assets';
 
-export type DinoOpts = { x: number; y: number; w: number; h: number; groundY: number };
+export type DinoOpts = { x: number; y: number; y0:number ; w: number; h: number};
 
 export class Dino {
   x: number;
   y: number;
+  y0: number;
   w: number;
   h: number;
   vy = 0;
   onGround = true;
-  groundY: number;
   image: HTMLImageElement | null = null;
 
   private keyHandler = (e: KeyboardEvent) => {
@@ -27,9 +27,9 @@ export class Dino {
   constructor(o: DinoOpts, img: HTMLImageElement | null = null) {
     this.x = o.x;
     this.y = o.y;
+    this.y0 = o.y0;
     this.w = o.w;
     this.h = o.h;
-    this.groundY = o.groundY;
     this.image = img;
   }
 
@@ -38,12 +38,12 @@ export class Dino {
   }
 
   update(dt: number) {
-    const GRAVITY = 0.9;
+    const GRAVITY = 5000;
     if (!this.onGround) {
       this.vy += GRAVITY * dt;
-      this.y += this.vy;
-      if (this.y + this.h >= this.groundY) {
-        this.y = this.groundY - this.h;
+      this.y += this.vy * dt;
+      if (this.y  >= this.y0) {
+        this.y = this.y0;
         this.vy = 0;
         this.onGround = true;
       }
@@ -61,7 +61,7 @@ export class Dino {
   }
 
   jump() {
-    const JUMP_V = -15;
+    const JUMP_V = -1000;
     if (this.onGround) {
       this.vy = JUMP_V;
       this.onGround = false;
