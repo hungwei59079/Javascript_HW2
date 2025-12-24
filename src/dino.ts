@@ -10,7 +10,9 @@ export class Dino {
   h: number;
   vy = 0;
   onGround = true;
-  image: HTMLImageElement | null = null;
+  image_default: HTMLImageElement | null = null;
+  image_left_foot : HTMLImageElement | null = null;
+  image_right_foot : HTMLImageElement | null = null;
 
   private keyHandler = (e: KeyboardEvent) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
@@ -30,11 +32,14 @@ export class Dino {
     this.y0 = o.y0;
     this.w = o.w;
     this.h = o.h;
-    this.image = img;
+    this.image_default = img;
   }
 
-  setImage(img: HTMLImageElement | null) {
-    this.image = img;
+  // Set all three posture images at once
+  setImages(imgDefault: HTMLImageElement | null, imgLeft: HTMLImageElement | null, imgRight: HTMLImageElement | null) {
+    this.image_default = imgDefault;
+    this.image_left_foot = imgLeft;
+    this.image_right_foot = imgRight;
   }
 
   update(dt: number) {
@@ -50,11 +55,16 @@ export class Dino {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    if (this.image) {
-      ctx.drawImage(this.image, this.x, this.y, this.w, this.h);
+  // Optional: pass a triple of images to assign them before drawing
+  draw(ctx: CanvasRenderingContext2D, images?: [HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]) {
+    if (images) {
+      this.setImages(images[0], images[1], images[2]);
+    }
+
+    if (this.image_default) {
+      ctx.drawImage(this.image_default, this.x, this.y, this.w, this.h);
     } else {
-      console.error("image not found")
+      console.error('image not found');
       ctx.fillStyle = '#222';
       ctx.fillRect(this.x, this.y, this.w, this.h);
     }
@@ -85,6 +95,7 @@ export class Dino {
   }
 }
 
-export function loadDinoImage(): Promise<HTMLImageElement | null> {
-  return loadImage('/assets/dino_normal.png').catch(() => null);
+export function loadDinoImage(): Promise<[HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]> {
+  const paths = ['/assets/dino_normal.png', '/assets/dino_left_foot.png', '/assets/dino_right_foot.png'];
+  return Promise.all(paths.map((p) => loadImage(p).catch(() => null))) as Promise<[HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]>;
 }
