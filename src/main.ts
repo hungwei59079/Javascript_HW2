@@ -1,33 +1,39 @@
 import { loadAllAssets } from './assets';
 import { Dino } from './dino';
-import { Obstacle, createObstacle } from './obstacles';
+import { Obstacle, ObstacleManager } from './obstacles';
 
+// ----------- Canvas & Rendering -----------
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
 
+// ----------- UI Elements -----------
 const Start_button = document.getElementById("start_button") as HTMLButtonElement;
 const Game_over_button = document.getElementById("game_over_button") as HTMLButtonElement;
 
-const WIDTH = canvas.width;
-const HEIGHT = canvas.height;
-const initial_height = HEIGHT - 80
+// ----------- Game Constants -----------
+const INITIAL_HEIGHT = HEIGHT - 80;
+const OBSTACLE_SPAWN_INTERVAL = 1.5; // seconds
+
+// ----------- Game State -----------
 let game_over = false;
-
-let obstacle_img : HTMLImageElement | null = null;
-const existing_obstacles: Obstacle[] = [];
-let timeSinceLastObstacle=0;
-const obstacleSpawnInterval=1.5;
-
 let last = 0;
 
-const dino = new Dino(50, initial_height, 120, 80);
+// ----------- Obstacle State -----------
+let obstacle_manager: ObstacleManager;
 
-setInterval(() => {console.log(`game_over : ${game_over}`)}, 1000);
-// ----------- Load assets -----------
+// ----------- Game Entities -----------
+const dino = new Dino(50, INITIAL_HEIGHT, 120, 80);
+
+// ----------- Debug -----------
+setInterval(() => { console.log(`game_over : ${game_over}`); }, 1000);
+
+// ----------- Initialization -----------
 loadAllAssets()
   .then((assets) => {
     const dino_imgs = assets.dinoImages;
-    obstacle_img = assets.obstacleImage;
+    obstacle_manager = new ObstacleManager(assets.obstacleImage, OBSTACLE_SPAWN_INTERVAL);
     dino.setImages(dino_imgs[0], dino_imgs[1], dino_imgs[2]);
     Start_button.addEventListener('click', game_start);
     Game_over_button.addEventListener('click', () => {
@@ -42,14 +48,14 @@ loadAllAssets()
   })
   .catch(() => console.error('Failed to load dino images'));
 
-// -----------The call stack ends here----------
+// ----------- The call stack ends here -----------
 
-// -----------Definitions-----------
+// ----------- Function Definitions -----------
 
 function update(dt: number) {
   dino.update(dt);
-  if (existing_obstacles.length > 0) {
-      for (const obs of existing_obstacles) {
+  if (obstacle_manager.existing_obstacles.length > 0) {
+      for (const obs of obstacle_manager.existing_obstacles) {
         obs.update(dt);
       }
   }
@@ -63,8 +69,8 @@ function draw() {
 
   // dino 
   dino.draw(ctx);
-  if (existing_obstacles.length > 0) {
-      for (const obs of existing_obstacles) {
+  if (obstacle_manager.existing_obstacles.length > 0) {
+      for (const obs of obstacle_manager.existing_obstacles) {
         obs.draw(ctx);
       }
   }
@@ -72,25 +78,25 @@ function draw() {
 
 function loop(ts: number) {
   const dt = Math.min(1 / 30, (ts - last) / 1000);
-  timeSinceLastObstacle += dt;
+  obstacle_manager.timeSinceLastObstacle += dt;
   update(dt);
   draw();
   
   // Remove obstacles that are off-screen to save memory
-  for (let i = existing_obstacles.length - 1; i >= 0; i--) {
-    if (existing_obstacles[i].x < -30) {
-      existing_obstacles.splice(i, 1);
+  for (let i = obstacle_manager.existing_obstacles.length - 1; i >= 0; i--) {
+    if (obstacle_manager.existing_obstacles[i].x < -30) {
+      obstacle_manager.existing_obstacles.splice(i, 1);
     }
   }
   
-  if (timeSinceLastObstacle >= obstacleSpawnInterval && obstacle_img) {
-    const newObstacle = createObstacle(Math.random(), obstacle_img);
+  if (obstacle_manager.timeSinceLastObstacle >= OBSTACLE_SPAWN_INTERVAL && obstacle_manager.obstacle_img) {
+    const newObstacle = obstacle_manager.createObstacle(Math.random());
     if (newObstacle) {
-      existing_obstacles.push(newObstacle);
-      timeSinceLastObstacle = 0;
+      obstacle_manager.existing_obstacles.push(newObstacle);
+      obstacle_manager.timeSinceLastObstacle = 0;
     }
   }
-  console.log(`number of obstacles: ${existing_obstacles.length}`);
+  console.log(`number of obstacles: ${obstacle_manager.existing_obstacles.length}`);
   if (!game_over) {
     last = ts;
     requestAnimationFrame(loop);
