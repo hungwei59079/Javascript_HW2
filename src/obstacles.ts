@@ -18,7 +18,7 @@ export function createObstacle(random_number : number, obstacle_img: HTMLImageEl
     if (random_number < 0.01) {
         // Create a cactus obstacle
         console.log("Creating new obstacle");
-        return new Obstacle(800, 120, 40, 60, obstacle_img); //Fix me: adjust y position as needed
+        return new Obstacle(800, 150, 20, 30, obstacle_img); //Fix me: adjust y position as needed
     }
     else {
         return null;

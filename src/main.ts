@@ -15,6 +15,8 @@ let game_over = false;
 
 let obstacle_img : HTMLImageElement | null = null;
 const existing_obstacles: Obstacle[] = [];
+let timeSinceLastObstacle=0;
+const obstacleSpawnInterval=1.5;
 
 let last = 0;
 
@@ -70,6 +72,7 @@ function draw() {
 
 function loop(ts: number) {
   const dt = Math.min(1 / 30, (ts - last) / 1000);
+  timeSinceLastObstacle += dt;
   update(dt);
   draw();
   
@@ -80,10 +83,11 @@ function loop(ts: number) {
     }
   }
   
-  if (obstacle_img !== null) {
+  if (timeSinceLastObstacle >= obstacleSpawnInterval && obstacle_img) {
     const newObstacle = createObstacle(Math.random(), obstacle_img);
     if (newObstacle) {
-    existing_obstacles.push(newObstacle);
+      existing_obstacles.push(newObstacle);
+      timeSinceLastObstacle = 0;
     }
   }
   console.log(`number of obstacles: ${existing_obstacles.length}`);
