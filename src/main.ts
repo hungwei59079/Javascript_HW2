@@ -13,7 +13,9 @@ const Start_button = document.getElementById("start_button") as HTMLButtonElemen
 const Game_over_button = document.getElementById("game_over_button") as HTMLButtonElement;
 
 // ----------- Game Constants -----------
-const INITIAL_HEIGHT = HEIGHT - 80;
+const floor_thickness = 20;
+const dino_width = 50;
+const dino_height = 50; 
 const OBSTACLE_SPAWN_INTERVAL = 0.5; // seconds
 const dino_animation_interval = 0.1; // seconds
 
@@ -25,9 +27,11 @@ let last = 0;
 let obstacle_manager: ObstacleManager;
 
 // ----------- Game Entities -----------
-const dino = new Dino(50, INITIAL_HEIGHT, 140, 80, null, dino_animation_interval);
+const dino = new Dino(100, HEIGHT - floor_thickness - dino_height, dino_width, dino_height, null, dino_animation_interval);
 
 // ----------- Debug -----------
+const DEBUG_SHOW_TICKS = true; // Set to false to hide grid ticks
+const DEBUG_TICK_INTERVAL = 50; // Pixels between tick marks
 setInterval(() => { console.log(`game_over : ${game_over}`); }, 1000);
 
 // ----------- Initialization -----------
@@ -64,6 +68,12 @@ function update(dt: number) {
 
 function draw() {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
+  
+  // Debug: draw grid ticks
+  if (DEBUG_SHOW_TICKS) {
+    drawDebugTicks();
+  }
+  
   // ground
   ctx.fillStyle = '#cacacaff';
   ctx.fillRect(0, HEIGHT - 20, WIDTH, 20);
@@ -112,4 +122,36 @@ function game_start() {
   dino.attachControls();
   last = performance.now();
   requestAnimationFrame(loop);
+}
+
+function drawDebugTicks() {
+  ctx.save();
+  ctx.strokeStyle = '#ddd';
+  ctx.fillStyle = '#999';
+  ctx.font = '10px monospace';
+  ctx.lineWidth = 1;
+
+  // Vertical lines and X-axis labels
+  for (let x = 0; x <= WIDTH; x += DEBUG_TICK_INTERVAL) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, HEIGHT);
+    ctx.stroke();
+    // Label every tick
+    ctx.fillText(x.toString(), x + 2, 12);
+  }
+
+  // Horizontal lines and Y-axis labels
+  for (let y = 0; y <= HEIGHT; y += DEBUG_TICK_INTERVAL) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(WIDTH, y);
+    ctx.stroke();
+    // Label every tick (skip 0 since X already labeled there)
+    if (y > 0) {
+      ctx.fillText(y.toString(), 2, y - 2);
+    }
+  }
+
+  ctx.restore();
 }

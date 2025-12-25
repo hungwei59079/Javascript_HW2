@@ -3,7 +3,7 @@ import { GameEntity } from './GameEntity';
 export class Dino extends GameEntity {
   y0: number;
   vy: number = 0;
-  onGround: boolean= true;
+  onGround: boolean= false;
   image_left_foot : HTMLImageElement | null = null;
   image_right_foot : HTMLImageElement | null = null;
   animation_interval: number  = 0.1; // seconds
