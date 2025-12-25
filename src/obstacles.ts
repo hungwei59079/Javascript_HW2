@@ -1,5 +1,4 @@
 import { GameEntity } from "./GameEntity";
-import { loadImage } from "./assets";
 export class Obstacle extends GameEntity {
   horizontalSpeed: number = 300;
   constructor(x: number, y: number, w: number, h: number, image_default?: HTMLImageElement | null) {
@@ -15,14 +14,11 @@ export class Obstacle extends GameEntity {
   // setImage method inherited from GameEntity
 }
 
-export function loadObstacleImage(src: string): Promise<HTMLImageElement> {
-    return loadImage(src);
-}
-
-export function createObstacle(random_number : number): Obstacle | null {
-    if (random_number < 0.5) {
+export function createObstacle(random_number : number, obstacle_img: HTMLImageElement): Obstacle | null {
+    if (random_number < 0.01) {
         // Create a cactus obstacle
-        return new Obstacle(800,  120, 40, 60); //Fix me: adjust y position as needed
+        console.log("Creating new obstacle");
+        return new Obstacle(800, 120, 40, 60, obstacle_img); //Fix me: adjust y position as needed
     }
     else {
         return null;

@@ -1,16 +1,9 @@
-import { loadImage } from './assets';
+import { GameEntity } from './GameEntity';
 
-export type DinoOpts = { x: number; y: number; y0:number ; w: number; h: number};
-
-export class Dino {
-  x: number;
-  y: number;
+export class Dino extends GameEntity {
   y0: number;
-  w: number;
-  h: number;
   vy = 0;
   onGround = true;
-  image_default: HTMLImageElement | null = null;
   image_left_foot : HTMLImageElement | null = null;
   image_right_foot : HTMLImageElement | null = null;
 
@@ -26,13 +19,9 @@ export class Dino {
     this.jump();
   };
 
-  constructor(o: DinoOpts, img: HTMLImageElement | null = null) {
-    this.x = o.x;
-    this.y = o.y;
-    this.y0 = o.y0;
-    this.w = o.w;
-    this.h = o.h;
-    this.image_default = img;
+  constructor(x: number, y: number, w: number, h: number, image_default?: HTMLImageElement | null) {
+    super(x, y, w, h, image_default);
+    this.y0 = y;
   }
 
   // Set all three posture images at once
@@ -56,7 +45,7 @@ export class Dino {
   }
 
   // Optional: pass a triple of images to assign them before drawing
-  draw(ctx: CanvasRenderingContext2D, images?: [HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]) {
+  override draw(ctx: CanvasRenderingContext2D, images?: [HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]) {
     if (images) {
       this.setImages(images[0], images[1], images[2]);
     }
@@ -95,7 +84,3 @@ export class Dino {
   }
 }
 
-export function loadDinoImage(): Promise<[HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]> {
-  const paths = ['/assets/dino_normal.png', '/assets/dino_left_foot.png', '/assets/dino_right_foot.png'];
-  return Promise.all(paths.map((p) => loadImage(p).catch(() => null))) as Promise<[HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]>;
-}
