@@ -2,10 +2,11 @@ import { GameEntity } from './GameEntity';
 
 export class Dino extends GameEntity {
   y0: number;
-  vy = 0;
-  onGround = true;
+  vy: number = 0;
+  onGround: boolean= true;
   image_left_foot : HTMLImageElement | null = null;
   image_right_foot : HTMLImageElement | null = null;
+  animation_interval: number  = 0.1; // seconds
 
   private keyHandler = (e: KeyboardEvent) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
@@ -19,9 +20,10 @@ export class Dino extends GameEntity {
     this.jump();
   };
 
-  constructor(x: number, y: number, w: number, h: number, image_default?: HTMLImageElement | null) {
+  constructor(x: number, y: number, w: number, h: number, image_default?: HTMLImageElement | null, animation_interval?: number) {
     super(x, y, w, h, image_default);
     this.y0 = y;
+    this.animation_interval = animation_interval ?? 0.1;
   }
 
   // Set all three posture images at once
@@ -44,18 +46,21 @@ export class Dino extends GameEntity {
     }
   }
 
-  // Optional: pass a triple of images to assign them before drawing
-  override draw(ctx: CanvasRenderingContext2D, images?: [HTMLImageElement | null, HTMLImageElement | null, HTMLImageElement | null]) {
-    if (images) {
-      this.setImages(images[0], images[1], images[2]);
-    }
-
-    if (this.image_default) {
-      ctx.drawImage(this.image_default, this.x, this.y, this.w, this.h);
+  override draw(ctx: CanvasRenderingContext2D) {
+    if (this.onGround && this.image_left_foot && this.image_right_foot) {
+      const time = performance.now() / 1000; // time in seconds
+      const phase = Math.floor(time / this.animation_interval) % 2;
+      if (phase === 0) {
+        ctx.drawImage(this.image_left_foot, this.x, this.y, this.w, this.h);
+      } else {
+        ctx.drawImage(this.image_right_foot, this.x, this.y, this.w, this.h);
+      }
+    } else if (this.image_default) {
+        ctx.drawImage(this.image_default, this.x, this.y, this.w, this.h);
     } else {
-      console.error('image not found');
-      ctx.fillStyle = '#222';
-      ctx.fillRect(this.x, this.y, this.w, this.h);
+        console.error('image not found');
+        ctx.fillStyle = '#222';
+        ctx.fillRect(this.x, this.y, this.w, this.h);
     }
   }
 

@@ -14,7 +14,8 @@ const Game_over_button = document.getElementById("game_over_button") as HTMLButt
 
 // ----------- Game Constants -----------
 const INITIAL_HEIGHT = HEIGHT - 80;
-const OBSTACLE_SPAWN_INTERVAL = 1.5; // seconds
+const OBSTACLE_SPAWN_INTERVAL = 0.5; // seconds
+const dino_animation_interval = 0.1; // seconds
 
 // ----------- Game State -----------
 let game_over = false;
@@ -24,7 +25,7 @@ let last = 0;
 let obstacle_manager: ObstacleManager;
 
 // ----------- Game Entities -----------
-const dino = new Dino(50, INITIAL_HEIGHT, 120, 80);
+const dino = new Dino(50, INITIAL_HEIGHT, 140, 80, null, dino_animation_interval);
 
 // ----------- Debug -----------
 setInterval(() => { console.log(`game_over : ${game_over}`); }, 1000);
@@ -42,9 +43,9 @@ loadAllAssets()
       console.log("Game Over clicked - controls detached");
     });
     // Initial draw
-    dino.draw(ctx);
-    ctx.fillStyle = '#666';
+    ctx.fillStyle = '#cacacaff';
     ctx.fillRect(0, HEIGHT - 20, WIDTH, 20);
+    dino.draw(ctx);
   })
   .catch(() => console.error('Failed to load dino images'));
 
@@ -64,7 +65,7 @@ function update(dt: number) {
 function draw() {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   // ground
-  ctx.fillStyle = '#666';
+  ctx.fillStyle = '#cacacaff';
   ctx.fillRect(0, HEIGHT - 20, WIDTH, 20);
 
   // dino 
