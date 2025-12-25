@@ -72,6 +72,14 @@ function loop(ts: number) {
   const dt = Math.min(1 / 30, (ts - last) / 1000);
   update(dt);
   draw();
+  
+  // Remove obstacles that are off-screen to save memory
+  for (let i = existing_obstacles.length - 1; i >= 0; i--) {
+    if (existing_obstacles[i].x < -30) {
+      existing_obstacles.splice(i, 1);
+    }
+  }
+  
   if (obstacle_img !== null) {
     const newObstacle = createObstacle(Math.random(), obstacle_img);
     if (newObstacle) {
