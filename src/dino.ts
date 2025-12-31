@@ -8,6 +8,11 @@ export class Dino extends GameEntity {
   image_right_foot : HTMLImageElement | null = null;
   animation_interval: number  = 0.1; // seconds
 
+  private static readonly airtime = 0.4;
+  private static readonly jump_height = 100;
+  private static readonly JUMP_V = - (4 * Dino.jump_height) / Dino.airtime;
+  private static readonly GRAVITY = (8 * Dino.jump_height) / (Dino.airtime * Dino.airtime);
+
   private keyHandler = (e: KeyboardEvent) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
       e.preventDefault();
@@ -34,9 +39,8 @@ export class Dino extends GameEntity {
   }
 
   update(dt: number) {
-    const GRAVITY = 5000;
     if (!this.onGround) {
-      this.vy += GRAVITY * dt;
+      this.vy += Dino.GRAVITY * dt;
       this.y += this.vy * dt;
       if (this.y  >= this.y0) {
         this.y = this.y0;
@@ -65,9 +69,8 @@ export class Dino extends GameEntity {
   }
 
   jump() {
-    const JUMP_V = -1000;
     if (this.onGround) {
-      this.vy = JUMP_V;
+      this.vy = Dino.JUMP_V;
       this.onGround = false;
     }
   }

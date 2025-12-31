@@ -1,6 +1,6 @@
 import { GameEntity } from "./GameEntity";
 export class Obstacle extends GameEntity {
-  horizontalSpeed: number = 300;
+  horizontalSpeed: number = 400;
   constructor(x: number, y: number, w: number, h: number, image_default?: HTMLImageElement | null) {
     super(x, y, w, h, image_default);
   }

@@ -1,6 +1,7 @@
 import { loadAllAssets } from './assets';
 import { Dino } from './dino';
-import { Obstacle, ObstacleManager } from './obstacles';
+import { ObstacleManager } from './obstacles';
+import { Score_manager } from './score';
 
 // ----------- Canvas & Rendering -----------
 const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -23,16 +24,17 @@ const dino_animation_interval = 0.1; // seconds
 let game_over = false;
 let last = 0;
 
-// ----------- Obstacle State -----------
-let obstacle_manager: ObstacleManager;
-
 // ----------- Game Entities -----------
 const dino = new Dino(100, HEIGHT - floor_thickness - dino_height, dino_width, dino_height, null, dino_animation_interval);
+let obstacle_manager: ObstacleManager;
+const score_counter = new Score_manager(100); // 100 points per second
 
 // ----------- Debug -----------
-const DEBUG_SHOW_TICKS = true; // Set to false to hide grid ticks
+const DEBUG_MODE = false; // Set to false to hide grid ticks
 const DEBUG_TICK_INTERVAL = 50; // Pixels between tick marks
-setInterval(() => { console.log(`game_over : ${game_over}`); }, 1000);
+if (DEBUG_MODE){
+  setInterval(() => { console.log(`game_over : ${game_over}`); }, 1000);
+}
 
 // ----------- Initialization -----------
 loadAllAssets()
@@ -41,11 +43,15 @@ loadAllAssets()
     obstacle_manager = new ObstacleManager(assets.obstacleImage, OBSTACLE_SPAWN_INTERVAL);
     dino.setImages(dino_imgs[0], dino_imgs[1], dino_imgs[2]);
     Start_button.addEventListener('click', game_start);
-    Game_over_button.addEventListener('click', () => {
-      dino.detachControls();
-      game_over = true;
+    if (DEBUG_MODE) {
+      Game_over_button.addEventListener('click', () => {
+      game_over_func();
       console.log("Game Over clicked - controls detached");
-    });
+    })
+  } else {
+      Game_over_button.style.display = 'none';
+    }
+    ;
     // Initial draw
     ctx.fillStyle = '#cacacaff';
     ctx.fillRect(0, HEIGHT - 20, WIDTH, 20);
@@ -64,13 +70,15 @@ function update(dt: number) {
         obs.update(dt);
       }
   }
+  score_counter.update(dt);
 }
 
 function draw() {
+  // Clear entire canvas
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   
   // Debug: draw grid ticks
-  if (DEBUG_SHOW_TICKS) {
+  if (DEBUG_MODE) {
     drawDebugTicks();
   }
   
@@ -80,11 +88,15 @@ function draw() {
 
   // dino 
   dino.draw(ctx);
+
+  // obstacles
   if (obstacle_manager.existing_obstacles.length > 0) {
       for (const obs of obstacle_manager.existing_obstacles) {
         obs.draw(ctx);
       }
   }
+  // score
+  score_counter.draw(ctx);
 }
 
 function loop(ts: number) {
@@ -99,7 +111,7 @@ function loop(ts: number) {
       obstacle_manager.existing_obstacles.splice(i, 1);
     }
   }
-  
+  // Spawn new obstacles
   if (obstacle_manager.timeSinceLastObstacle >= OBSTACLE_SPAWN_INTERVAL && obstacle_manager.obstacle_img) {
     const newObstacle = obstacle_manager.createObstacle(Math.random());
     if (newObstacle) {
@@ -108,6 +120,15 @@ function loop(ts: number) {
     }
   }
   console.log(`number of obstacles: ${obstacle_manager.existing_obstacles.length}`);
+  // Check for collisions
+  for (const obs of obstacle_manager.existing_obstacles) {
+    if (dino.collidesWith(obs)) {
+      console.log("Collision detected! Game Over.");
+      game_over_func();
+      break;
+    }
+  }
+  // Continue or stop the loop
   if (!game_over) {
     last = ts;
     requestAnimationFrame(loop);
@@ -118,10 +139,20 @@ function loop(ts: number) {
 
 function game_start() {
   Start_button.textContent = "Retry";
+  Start_button.disabled = true;
   game_over = false;
+  score_counter.reset();
+  obstacle_manager.existing_obstacles = [];
+  dino.y = dino.y0;
   dino.attachControls();
   last = performance.now();
   requestAnimationFrame(loop);
+}
+
+function game_over_func() {
+  game_over = true;
+  dino.detachControls();
+  Start_button.disabled = false;
 }
 
 function drawDebugTicks() {
